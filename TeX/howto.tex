@@ -1,0 +1,172 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\begin{document}
+
+\begin{flushleft}
+Scott Clark \\
+MPIPKS
+\end{flushleft}
+
+\section{FORTRAN codes}
+
+\subsection{planenodesComplex.f}
+
+This program will generate a user defined number of instances of a matrix of values that correspond to a user defined number of sinusoidal plane waves of user defined wavelength superimposed in a box of user defined area.
+
+The function that we are examining in the complex case is
+
+\[\Psi(x,y) = \sum_{i = 1}^{N} a_{i} \cos \left(\frac{\sin(\theta_{i}^{(1)}) x}{\lambda/2 \pi} + \frac{cos(\theta_{i}^{(1)}) y}{\lambda/2 \pi} + \delta_{i}^{(1)} \right) + b_{i} i \sin \left(\frac{\sin(\theta_{i}^{(2)}) x}{\lambda/2 \pi} + \frac{cos(\theta_{i}^{(2)}) y}{\lambda/2 \pi} + \delta_{i}^{(2)} \right)\]
+where each $a_{i}$ and $b_{i}$ is independent and identically normally distributed with mean 0 and variance 1 (N(0,1)). And each $\theta_{i}^{(1)}, \theta_{i}^{(2)}, \delta_{i}^{(1)}, \delta_{i}^{(2)}$ is independent and identically uniformly distributed from 0 to $2\pi$.
+
+It then calculates the mean value of the largest point in each iteration (the mean extrema), the mean value of all maximas of each instance, the mean value of the field of all instances and the mean number of maxima over all interations.
+
+It also calculates the extreme (largest) value, the mean of all maxima, and the number of maxima for each instance individually.
+
+\subsection{How to run it}
+
+\begin{enumerate}
+	\item Open \verb|planenodeComplex.f| in your favorite text editor.
+	\item Go to line 16 and choose the size of the length of the box that you want, \verb|parameter (boxsize=512)|
+	\item Line 17 lets you choose the number of waves to be superimposed,
+	\item Line 18 lets you choose the resolution of the grid (how many values will be calculated). A res=2 will correspond to a grid spacing of 0.5, which means that values will be calculated for $(0, 0.5, 1, 1.5, \ldots , boxsize - 0.5, boxsize)$.
+	\item Line 19 Put one over the value chosen for line 18 here.
+	\item Line 20 This is how many instances of the superposition you want the program to generate
+	\item Line 21 This allows you to set the wavelength of the waves, this is in units of $2 \pi$. So a 1 here will correspond to wavelengths of $2 \pi$.
+	\item Line 49 This is where the main output will be stored
+	\item Line 50 This is where the top and bottom 20 maxima of each iteration are stored
+	\item Line 51 This is where every maxima for the first 10 iterations is stored
+	\item Save the file.
+	\item Open up a console and ls to the directory in which the file is.
+	\item Complie using your favorite fortran compiler. I used \verb|gfortran|.
+	\item run \verb|./a.out|.
+	\item wait... Depending on how large the box was (boxsize*res)$^{2}$ and how many iterations you requested this could take some time. It will give a warning when it is half way done. (256x256 box with res 2, 1000 iterations took 46023 seconds, 512x512 will take four times as long, 128x128 one fourth as long etc).
+	\item Some output is diplayed to the screen, but all of the useful information is stored in the files specified on Line 49-51.
+	\item See next section for deciphering the output.
+\end{enumerate}
+
+\subsection{Output}
+
+The output is divided into three files. The exact output files are determined in steps 8-10 of the previous section. The naming conventions I used are as follows.
+
+\verb|pnC_L256_w1000_res2_iter1000...|
+
+Which can be broken down into parts
+
+\begin{enumerate}
+	\item \verb|pnC| vs. \verb|pnR| refers to whether the waves are real or complex
+	\item \verb|L256| refers to the length of the side of the box
+	\item \verb|res2| refers to the resolution
+	\item \verb|iter1000| refers to the number of iterations preformed
+\end{enumerate}
+
+\subsubsection{pnC\_L256\_w1000\_res2\_iter1000.dat}
+
+In this file the basic information about the run is stored at the top and then the extreme value, mean maxima value and number of maxima is given for each iteration. An example is the following,
+
+\begin{verbatim}
+ Area:          256
+ Waves:         1000
+ iter:         1000
+ time:        46923
+ mean extrema:    9908.12088962809     
+ mean maxima:    1850.67653867046     
+ mean field:    498.672429301760     
+ mean nodes:    3007.61800000000     
+ iteration:            1
+ extrema:    9906.48570757691     
+ meanMaxima:    1908.56311983895     
+ numMaxima:         3032
+ iteration:            2
+ extrema:    6754.83577089410     
+ meanMaxima:    1519.23117868873     
+ numMaxima:         3015
+ ...
+\end{verbatim}
+
+\subsubsection{pnC\_L256\_w1000\_res2\_iter1000\_maxima.dat}
+
+In this section the top 20 and bottom 20 maxima for each iteration is stored. In the following way
+
+First \verb|START 1| is printed.
+
+Then the largest 20 maxima of the first iteration is printed one to a row.
+
+Then \verb|MID 1| is printed.
+
+Them the smallest 20 maxima of the first iteration is printed.
+
+Then \verb|END 1| is printed.
+
+Then \verb|START 2| is printed.
+
+Then the largest 20 maxima of the second iteration is printed.
+
+And so on for all iterations
+
+This can be readily modified using a Java or Perl script to be formated in any way. An included Java program does just this to make it easier for matlab or any other program to accept it as input.
+
+\subsubsection{pnC\_L256\_w1000\_res2\_iter1000\_maximaFULL.dat}
+
+This file lists every maxima found in the first 10 iterations, one per row.
+
+\subsection{planenodesReal.f}
+
+Same as everything above except it does it for the real case.
+
+\section{Matlab code}
+
+\subsection{PlanenodesComplex.m}
+
+This does basically the same thing as the fortran program only 10 times slower. It does allow easy manipulation of the output however and can be useful for short runs.
+
+\subsubsection{How to run it}
+
+\begin{enumerate}
+	\item{Open the file in a text editor}
+	\item{line 6: how many iterations will the program as a whole be run for}
+	\item{line 9: wavelength}
+	\item{line 10: length of first side of box}
+	\item{line 11: length of second side of box}
+	\item{line 12: x resolution (see *.f explaination)}
+	\item{line 13: y resolution (see *.f explaination)}
+	\item{line 17: number of waves to be superimposed}
+	\item{line 23: number of iterations the program will loop through}
+\end{enumerate}
+
+\subsubsection{Output}
+
+\textbf{hightot:} All of the extreme values for each iteration.
+
+The program is easily modified at the cost of runtime to find every maxima, or the field, or any statistical property of interest. Keep in mind that this program is significantly slower than the fortran one and should not be used for large runs.
+
+\subsection{planenodes.m}
+
+Same as above, but real.
+
+\subsection{sinewaves.m}
+
+This program calculates various statistical properties of a particle trapped in a 2D box (with irrationally proportional sides) at various energies.
+
+\subsubsection{How to run it}
+
+\begin{enumerate}
+	\item{Open the file}
+	\item{Line 4: The number of frequencies that will be used in the wavefunctions}
+	\item{Line 5: Size of the x side of the box}
+	\item{Line 6: Size of the y side of the box}
+	\item{run, first run will be very very slow for high relsize. This information can be kept for future use though because it will not change}
+	\item{Included is a file \verb|sinewavesStats.m| that uses the file \verb|longrunbill.mat| that has all of the energies calculated and sorted, which is the process that takes the most time. It is highly recomended to use this program which is the exact same.}
+\end{enumerate}
+
+\subsubsection{Output}
+\\
+\textbf{maxtotal:} All of the extreme values for each iteration.
+\\
+\textbf{nodetotal:} The number of maxima for each iteration.
+\\
+This can be easily modified to find any statistical property of interest.
+
+\end{document}

@@ -1,0 +1,9 @@
+(C) 2007 Scott Clark, MPIPKS
+
+This file describes all of the files included in this folder and its sub directories.
+
+* README.pdf - The file you are reading now.
+* final.pdf - The project report that describes what was done and explains all of the data acquired.
+* howto.pdf - The file that explains how to use all of the files in the folder \code and all of the output files in the folder \output (output hidden from git)
+* \TeX - all of the *.tex files and their required figures
+* \code - all of the source
